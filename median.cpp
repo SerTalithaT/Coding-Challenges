@@ -52,10 +52,10 @@ public:
             median = (nums1[0] + nums2[bEnd]) / 2; 
         }
         
+
         // else NOT all numbers in one array are <= the other
             // binary search for first place where 
-                // (a[currentMid] >= b[currentMid] && a[currentMid] <= b[currentMid + 1]) || (a[currentMid] <= b[currentMid] && a[currentMid] >= b[currentMid - 1])          
-                    
+                // (a[currentMid] >= b[currentMid] && a[currentMid] <= b[currentMid + 1]) || (a[currentMid] <= b[currentMid] && a[currentMid] >= b[currentMid - 1])      
         else        
         {
             int aMid = num1Size / 2, bMid = num2Size / 2; 
@@ -105,14 +105,28 @@ public:
            int above, below, diff; 
            int medianGuess = aMid, otherMid = bMid;
            int upperGuess, lowerGuess; 
-           bool guessArray = true
+           vector<int> guessArray, otherArray;
+           bool lookingAtA = true;           
                 //if true, medianGuess is array a(nums1) 
                 // false, median Guess is array b(nums2)
 
            do
            {   
-               
-                if(medianGuess > otherMid)
+               // switch between arrays
+                if (guessA)
+                {
+                    guessArray = nums1;
+                    otherArray = nums2;
+                }
+                else
+                {
+                    guessArray = nums2;
+                    otherArray = nums1;
+                }
+
+
+               //checking if we found median by checking to see if it is the middle value (or one of them)
+                if(guessArray[medianGuess] > otherArray[otherMid])
                 {
                     below = medianGuess + otherMid + 1;                    
                 }
@@ -120,58 +134,106 @@ public:
                 {
                     below = medianGuess + otherMid;
                 }
-                above = totalSize - below - 1;
+                above = totalSize - below - 1;  
                 diff = std::abs(above-below);
+               
+                //moving the guess values if a median value has not been found
+                if(diff > 1)
+                {                                
+                    if(above > below)
+                    {
+                        //need to move up
+                        if(guessArray[medianGuess] > otherArray[otherMid])
+                        {
+                            medianGuess ++;                 
+                        }
+                        else
+                        {
+                            int temp = medianGuess;
+                            medianGuess = otherMid;
+                            otherMid = temp;
+                            lookingAtA = !lookingAtA
+                        }
+                    }
+                    else
+                    {
+                        //need to move down
+                        if(guessArray[medianGuess] < otherArray[otherMid])
+                        {
+                            medianGuess --;      
+                                //if the guess goes out of range, then x[] <= y[] and istaken care up top                               
+                        }
+                        else
+                        {
+                            int temp = medianGuess;
+                            medianGuess = otherMid;
+                            otherMid = temp;
+                            lookingAtA = !lookingAtA
+                        }
+                    }
+                }
 
            }
            while(diff > 1)
 
-    //TODO mediantGuess & otherMid are indexes NOT values
-        // need to compare values for  sorting 
-        // probably needs the pass by referencere 
+           // once out of the while, a median value has been found
 
-            //currently assuming while check h
+           if(totalSize % 2 == 1)
+           {
+               //if total size is odd, medianGuess is the median
+               median = guessArray[medianGuess];
+           }    
+        
+            else
+            {
+                //if even, must find the other the half of the median 
+
+                if (guessA)
+                {
+                    guessArray = nums1;
+                    otherArray = nums2;
+                }
+                else
+                {
+                    guessArray = nums2;
+                    otherArray = nums1;
+                }
+
                 if(above > below)
                 {
-                    //need to move up
-                    if(medianGuess > otherMid)
+                    //medianGuess is the lower half of the median
+                    if(guessArray[medianGuess + 1] > otherArray[otherMid])
                     {
-                        medianGuess ++;                 
+                        median = (guessArray[medianGuess] + otherArray[otherMid]) / 2;                    
                     }
                     else
                     {
-                        int temp = medianGuess;
-                        medianGuess = otherMid;
-                        otherMid = temp;
-                        guessArray = !guessArray
+                         median = (guessArray[medianGuess] + guessArray[medianGuess + 1]) / 2;
                     }
                 }
                 else
                 {
-                    //need to move down
-                    if(medianGuess < otherMid)
+                    //medianGuess is the upper half of the median
+                    if(guessArray[medianGuess - 1] < otherArray[otherMid])
                     {
-                        medianGuess --;      
-                            //if the guess goes out of range, then x[] <= y[] and istaken care up top                               
+                        median = (guessArray[medianGuess] + otherArray[otherMid]) / 2;                    
                     }
                     else
                     {
-                        int temp = medianGuess;
-                        medianGuess = otherMid;
-                        otherMid = temp;
-                        guessArray = !guessArray
+                         median = (guessArray[medianGuess] + guessArray[medianGuess - 1]) / 2;
                     }
                 }
 
-
-            
-        }         
+            }
+        }          
+                 
         
         // median has been found
         return median;
     }
 
 
+    // helper function to return the current midpoint
     int currentMid(int top, int bottom)
     {
         int mid;
